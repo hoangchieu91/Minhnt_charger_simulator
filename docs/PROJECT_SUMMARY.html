@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo Tổng hợp Dự án: ESP32 Charger Gateway</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-panel: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.5);
+            --danger: #ef4444;
+            --success: #22c55e;
+            --border: #334155;
+            --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--accent);
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .architecture-img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 30px 0;
+            border: 1px solid var(--border);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--danger);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .alert strong {
+            color: var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="badge">ESP-IDF v5.x</div>
+            <div class="badge">C11 Native</div>
+            <h1>Minhnt Charger: ESP32 Gateway V2.2</h1>
+            <p>Báo cáo tổng hợp kiến trúc hệ thống, Firmware và đặc tả nghiệp vụ</p>
+        </div>
+
+        <div class="alert">
+            <strong>🚀 System Validation:</strong> Đã phát hiện và sửa chữa thành công BUG-2 (GPIO Pinout UART1) & BUG-8 (COM1 Disabled) trong Firmware. Sẵn sàng tiến hành <code>idf.py flash</code>.
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>Về Phần cứng</h3>
+                <ul class="feature-list">
+                    <li><strong>Vi điều khiển:</strong> ESP32-WROVER-B (8MB Flash, 4MB PSRAM).</li>
+                    <li><strong>Mạng Chính:</strong> IC PHY LAN8742A (Ethernet RMII) chống nhiễu (EMI). Chỉ bật WiFi AP khi nhấn nút GPIO34 (5 giây).</li>
+                    <li><strong>Giao tiếp Modbus (Bản DEV):</strong> Giao tiếp STM32 Slave thông qua <strong>RS485 Cổng 2 (COM2)</strong> trên chân dự phòng `GPIO32/33`. Tránh dùng Cổng 1 do lỗi thiết kế IC ăn chung vào UART0 Console.</li>
+                    <li><strong>Phụ trợ:</strong> DS1307 RTC, Hệ thống đèn trạng thái LED cảnh báo, Nút nhấn cứng.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>Về Kiến trúc Phần mềm</h3>
+                <ul class="feature-list">
+                    <li><strong>RTOS Tasks:</strong> 7 FreeRTOS tasks đồng thời. Modbus được pin trên Core 1 để tránh độ trễ từ Network Stack (trên Core 0).</li>
+                    <li><strong>Memory Layout:</strong> Flash 8MB quy hoạch rất chuẩn xác với phân vùng <code>storage</code> và OTA kép <code>ota_0 / ota_1</code>.</li>
+                    <li><strong>Event Driven:</strong> Core hệ thống sử dụng <code>esp_event_loop</code> thay vì polling liên tục, giúp truyền tin nhắn cross-task nhẹ nhàng.</li>
+                    <li><strong>LittleFS:</strong> Quản lý bộ nhớ non-volatile cho UI Dashboard (phân vùng <code>www</code>) và queue rớt mạng (phân vùng <code>storage</code>).</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 30px;">
+            <h3>Khối tính năng Trọng điểm (Store-And-Forward)</h3>
+            <p>Dự án tích hợp một module lưu trữ xuất sắc để chịu đựng đứt gãy kết nối mạng:</p>
+            <ul class="feature-list" style="columns: 1;">
+                <li>Khi Event hoặc Telemetry không thể nổ MQTT vì mất mạng ethernet, bản tin được đóng block JSON nhị phân 64 Bytes lưu vào Flash LittleFS.</li>
+                <li>Dung lượng queue khổng lồ: 28,672 block, chứa khoảng 24h hoạt động của 10 thiết bị.</li>
+                <li>Replay liên tục tuần tự đẩy lên lại mạng theo thứ tự thời gian ngay khi LAN8742A báo kết nối. Có FIFO trim khi đầy bộ nhớ.</li>
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h3>Luồng giao tiếp (Modbus & MQTT)</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nhiệm vụ</th>
+                            <th>Mô tả chức năng chi tiết</th>
+                            <th>Bảo mật & Tối ưu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Modbus RTU Polling</strong></td>
+                            <td>Quét mã 0x04 trên 45 thanh ghi Input định kỳ mỗi 1 giây (V, A, W, kWh). Gửi mã Heartbeat 0x06 mỗi 3s.</td>
+                            <td>Loại bỏ Slave rớt để duy trì frame time vòng quay. Dynamic limit dòng. </td>
+                        </tr>
+                        <tr>
+                            <td><strong>MQTT Payload V3.4</strong></td>
+                            <td>Kết nối Backend qua TLS Port 8883. Cung cấp 7 loại payload (gw_status, tlm, status, evt, cmd, cmd_ack, ota_progress).</td>
+                            <td>NVS chứng chỉ CA gốc bảo vệ man-in-the-middle.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Local Web Dashboard</strong></td>
+                            <td>HTTP Server chạy SPA, Websocket <code>/ws</code> xuất trạng thái Realtime cho người cài đặt local.</td>
+                            <td>Xác thực qua Cookie Session với Admin Password lưu ở NVS.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

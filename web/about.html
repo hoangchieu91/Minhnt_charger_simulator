@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng dẫn - MinhNt Simulator V7.7</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body { padding: 2rem; max-width: 1000px; margin: 0 auto; background: var(--bg); color: var(--text); }
+        .about-container { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; }
+        h1 { font-size: 1.8rem; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem; }
+        h2 { font-size: 1.4rem; border-left: 4px solid var(--primary); padding-left: 0.75rem; color: var(--text); margin-top: 2.5rem; margin-bottom: 1.25rem; }
+        h3 { font-size: 1.1rem; color: var(--accent); margin-top: 1.5rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.6rem; }
+        p { font-size: 0.95rem; color: var(--text); opacity: 0.9; margin-bottom: 1rem; line-height: 1.6; }
+        ul { margin-left: 1.5rem; margin-bottom: 1.5rem; line-height: 1.7; }
+        li { font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--secondary); }
+        b { color: var(--text); }
+        .grid-docs { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .doc-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
+        .mermaid { background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); display: flex; justify-content: center; margin-bottom: 2rem; }
+        .link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+        .net-link { display: flex; align-items: center; justify-content: center; gap: 0.75rem; padding: 1rem; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; color: var(--text); text-decoration: none; font-weight: 700; transition: 0.3s; }
+        .net-link:hover { background: #1e293b; border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .net-link i { color: var(--primary); font-size: 1.2rem; }
+        .badge-doc { display: inline-block; padding: 0.15rem 0.5rem; background: #1e293b; border: 1px solid var(--primary); border-radius: 4px; font-size: 0.75rem; font-family: monospace; color: var(--success); }
+    </style>
+</head>
+<body>
+    <div class="about-container">
+        <h1><i class="fas fa-book-open"></i> Tài Liệu Trạm Sạc MinhNt Simulator V7.7</h1>
+        
+        <h2><i class="fas fa-desktop"></i> Hướng Dẫn Ý Nghĩa Giao Diện Gíám Sát</h2>
+        <p>Giao diện Web Simulator cung cấp bảng điều khiển (Dashboard) của 10 thiết bị Slave Modbus RTU giả lập. Mỗi thẻ (Card) đại diện cho một trạm sạc với đầy đủ các thành phần hiển thị như sau:</p>
+        
+        <div class="grid-docs">
+            <div class="doc-card">
+                <h3>1. Các Tham Số Đo Lường (Metrics)</h3>
+                <ul>
+                    <li><b>ĐIỆN ÁP (V):</b> Điện áp AC hiện tại mô phỏng từ lưới điện lưới.</li>
+                    <li><b>DÒNG SẠC (A):</b> Cường độ dòng điện tức thời đang tiêu thụ bởi xe EV.</li>
+                    <li><b>CÔNG SUẤT (W):</b> <span class="badge-doc">V x A</span>. Tức thời. Sẽ bị ép về 0 nếu đồng hồ (Meter) hỏng.</li>
+                    <li><b>TỔNG ĐIỆN (kWh):</b> Tổng năng lượng đã sạc sau tất cả các phiên.</li>
+                    <li><b>NHIỆT ĐỘ (°C):</b> Nhiệt độ bo mạch / NTC. Nếu vượt 45°C quạt sẽ tự động bật theo thiết kế.</li>
+                </ul>
+            </div>
+            
+            <div class="doc-card">
+                <h3>2. Tính Năng Kịch Bản (Scenarios)</h3>
+                <p>Nằm trong Tab <b style="color:var(--primary)">Kịch bản</b>, dùng để can thiệp bằng tay vào Simulator:</p>
+                <ul>
+                    <li><b>Thanh trượt Nhiệt độ / Dòng Sạc:</b> Ghi đè chỉ số vật lý vào bộ nhớ thanh ghi.</li>
+                    <li><b>METER:</b> <span style="color:#ef4444">Quan Trọng!</span> Nút kiểm tra phản ứng của Master khi đồng hồ đo năng lượng bị đứt. Bấm để ngắt, P/V/I sẽ sập về 0.</li>
+                    <li><b>PLUG:</b> Giả lập thao tác người dùng cắm súng sạc điện vào ô tô. Trạng thái FSM cần PLUG mới có thể sạc.</li>
+                    <li><b>Thao tác Cửa:</b> Đóng/mở cửa tủ. Master sẽ báo lỗi nếu cửa tự động mở.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="grid-docs">
+            <div class="doc-card">
+                <h3>3. Phím Nhanh Chuyên Gia (Expert)</h3>
+                <ul>
+                    <li><b>Nhiễu (Jitter):</b> Rắc hạt nhiễu (Gaussian Noise) vào điện áp để kiểm tra khả năng bắt filter của Master.</li>
+                    <li><b>Master Fail:</b> Đánh sập luồng dữ liệu giả lập. Simulator sẽ lờ đi lệnh từ Master. Xem Heartbeat có báo đỏ trên trạm sạc không.</li>
+                    <li><b>Súng Sạc / Stop / Reset:</b> Kích hoạt ép trạng thái (FSM) từ xa. Icon Reset nhỏ góc phải sẽ dọn dẹp cờ Lỗi của trạm.</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h3>4. Monitor Trạng Thái Ổn Định</h3>
+                <ul>
+                    <li><b>METER OK / METER ERR:</b> Đèn báo trạng thái của đồng hồ vật lý dưới SN của trạm.</li>
+                    <li><b>MASTER LINK / TIMEOUT:</b> Báo mạch máu Heartbeat (Thanh ghi `0x0022`). Quá 60s không có tin từ Master sẽ chuyển đỏ.</li>
+                    <li><b>LEDs & Icons:</b> Icon Khóa (Relay), Cửa (Sensor), Quạt (Relay Fan) mô phỏng chính xác lệnh từ Master. Đèn RED/GREEN/WHITE cập nhật từ thanh ghi `0x0008` (LED Status).</li>
+                </ul>
+            </div>
+        </div>
+        
+        <h2><i class="fas fa-shield-halved"></i> Dual Audit Monitoring (Nghiệp vụ V7.6+)</h2>
+        <p>Hệ thống được thiết kế đặc biệt để test thuật toán **"Dual Audit"** của ESP32 Master, giả lập 2 loại lỗi độc lập và chí tử đối với tính toàn vẹn dữ liệu hệ thống Trạm sạc EV:</p>
+        <ul>
+            <li><b>Lỗi 1 - METER HỎNG:</b> Dùng nút `METER`. Khi ngắt, hệ thống sẽ chèn 0 vào các thanh ghi điện áp, công suất, dòng và thanh ghi 0x1A (Meter Valid = 0). Master phải phát hiện được và gửi lệnh khóa trạm, ngừng cho thanh toán sạc tiếp.</li>
+            <li><b>Lỗi 2 - MASTER TREO:</b> Dùng nút `Master Fail`. Lúc này, nếu sau 60 giây Simulator tự động nhận thấy `Heartbeat` thanh ghi 0x11 không cập nhật, nó sẽ đưa Reg 0x22 -> 2 và FSM chuyển thành COMM FAIL (Error 7).</li>
+        </ul>
+
+        <h2><i class="fas fa-diagram-project"></i> Sơ đồ kiến trúc & Giao tiếp nền tảng</h2>
+        <div class="mermaid">
+        graph TD
+            subgraph "Local Station (Simulator)"
+                SL[10 Slave Modbus RTU\nPython - pymodbus]
+            end
+            
+            subgraph "Master Device (ESP32 Controller)"
+                M[ESP32 Master\nRS485 Polling]
+            end
+            
+            subgraph "Infrastructure"
+                MQ[MQTT Broker\nHiveMQ / Mosquitto]
+                SRV[Cloud Server / Database\nNocoDB / Backend]
+                NG[Nginx Proxy Hub]
+            end
+
+            SL -- "RS485 (Modbus RTU)" --> M
+            M -- "WiFi / TLS" --> MQ
+            MQ -- "Telemetry" --> SRV
+            NG -- "Proxy Pass" --> SL
+            NG -- "Proxy Pass" --> M
+        </div>
+
+        <h2><i class="fas fa-link"></i> Truy cập nhanh (Internet / Portal)</h2>
+        <div class="link-grid">
+            <a href="https://nxchieu.duckdns.org/slave/" target="_blank" class="net-link">
+                <i class="fas fa-desktop"></i> Simulator Dashboard (Trang Bạn Đang Xem)
+            </a>
+            <a href="https://nxchieu.duckdns.org/master" target="_blank" class="net-link">
+                <i class="fas fa-gears"></i> ESP32 Master Web (Live Control)
+            </a>
+        </div>
+    </div>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
+    </script>
+</body>
+</html>

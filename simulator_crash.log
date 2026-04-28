@@ -1,0 +1,57 @@
+﻿ * Serving Flask app 'modbus_multi_slave'
+ * Debug mode: off
+python : INFO:werkzeug:[31m[1mWARNING: This is a 
+development server. Do not use it in a production 
+deployment. Use a production WSGI server instead.[0m
+At line:1 char:1
++ python modbus_multi_slave.py 2>&1 | Out-File 
+-FilePath simulator_cras ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (INFO:wer 
+   kzeug:...er instead.[0m:String) [], RemoteExcep  
+  tion
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.25.7.111:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:10.25.7.116 - - [07/Apr/2026 22:41:34] 
+"GET /socket.io/?EIO=4&transport=polling&t=Precp3S 
+HTTP/1.1" 200 -
+INFO:werkzeug:10.25.7.116 - - [07/Apr/2026 22:41:34] 
+"POST /socket.io/?EIO=4&transport=polling&t=Precp3l&si
+d=TTa8seppFU9xpCyfAAAA HTTP/1.1" 200 -
+INFO:werkzeug:10.25.7.116 - - [07/Apr/2026 22:41:34] 
+"GET /socket.io/?EIO=4&transport=polling&t=Precp3m&sid
+=TTa8seppFU9xpCyfAAAA HTTP/1.1" 200 -
+INFO:werkzeug:10.25.7.116 - - [07/Apr/2026 22:41:34] 
+"GET /socket.io/?EIO=4&transport=polling&t=Precp3w&sid
+=TTa8seppFU9xpCyfAAAA HTTP/1.1" 200 -
+INFO:werkzeug:10.25.7.116 - - [07/Apr/2026 22:48:17] 
+"[36mGET / HTTP/1.1[0m" 304 -
+INFO:werkzeug:10.25.7.116 - - [07/Apr/2026 22:48:17] 
+"[36mGET /style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:10.25.7.116 - - [07/Apr/2026 22:48:17] 
+"[36mGET /script.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:10.25.7.116 - - [07/Apr/2026 22:48:17] 
+"GET /socket.io/?EIO=4&transport=polling&t=PreeLvy 
+HTTP/1.1" 200 -
+INFO:werkzeug:10.25.7.116 - - [07/Apr/2026 22:48:17] 
+"POST /socket.io/?EIO=4&transport=polling&t=PreeLyS&si
+d=jNDIse4G5vDNQtQFAAAC HTTP/1.1" 200 -
+INFO:werkzeug:10.25.7.116 - - [07/Apr/2026 22:48:17] 
+"GET /socket.io/?EIO=4&transport=polling&t=PreeLyU&sid
+=jNDIse4G5vDNQtQFAAAC HTTP/1.1" 200 -
+INFO:werkzeug:10.25.7.116 - - [07/Apr/2026 22:48:18] 
+"GET /socket.io/?EIO=4&transport=polling&t=PreeL_J&sid
+=jNDIse4G5vDNQtQFAAAC HTTP/1.1" 200 -
+INFO:werkzeug:10.25.7.116 - - [07/Apr/2026 22:48:18] 
+"GET /socket.io/?EIO=4&transport=polling&t=PreeL_n&sid
+=jNDIse4G5vDNQtQFAAAC HTTP/1.1" 200 -
+INFO:werkzeug:10.25.7.116 - - [08/Apr/2026 00:00:01] 
+"GET /socket.io/?EIO=4&transport=websocket&sid=jNDIse4
+G5vDNQtQFAAAC HTTP/1.1" 200 -
+INFO:werkzeug:10.25.7.116 - - [08/Apr/2026 13:52:02] 
+"GET /socket.io/?EIO=4&transport=websocket&sid=TTa8sep
+pFU9xpCyfAAAA HTTP/1.1" 200 -

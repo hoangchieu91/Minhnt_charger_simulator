@@ -1,0 +1,46 @@
+{
+  "slaves": {
+    "2": {
+      "energy": 159589,
+      "boot_count": 3,
+      "total_charge_count": 0,
+      "session_id": 1000,
+      "sn_str": "824218374005"
+    },
+    "3": {
+      "energy": 148056,
+      "boot_count": 3,
+      "total_charge_count": 0,
+      "session_id": 1000,
+      "sn_str": "006453551527"
+    },
+    "4": {
+      "energy": 153432,
+      "boot_count": 3,
+      "total_charge_count": 0,
+      "session_id": 1000,
+      "sn_str": "448586731469"
+    },
+    "5": {
+      "energy": 180194,
+      "boot_count": 3,
+      "total_charge_count": 0,
+      "session_id": 1000,
+      "sn_str": "814715446088"
+    },
+    "6": {
+      "energy": 173756,
+      "boot_count": 3,
+      "total_charge_count": 0,
+      "session_id": 1000,
+      "sn_str": "795225677053"
+    },
+    "7": {
+      "energy": 158439,
+      "boot_count": 3,
+      "total_charge_count": 0,
+      "session_id": 1000,
+      "sn_str": "853396954429"
+    }
+  }
+}

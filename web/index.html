@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhnt Charger Simulator | System Control</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&family=Plus+Jakarta+Sans:wght@400;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #020617; --card: rgba(15, 23, 42, 0.9); --accent: #0ea5e9; --success: #10b981; --danger: #ef4444; --text: #f8fafc; --text-dim: #64748b; --border: rgba(255, 255, 255, 0.1); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); padding: 2rem; font-size: 14px; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+        
+        .sys-info { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        .sys-card { background: var(--card); border: 1px solid var(--border); border-radius: 1rem; padding: 1rem; }
+        .sys-label { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; margin-bottom: 5px; }
+        .sys-val { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; color: var(--accent); }
+
+        .meter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+        .m-card { background: var(--card); border: 1px solid var(--border); border-radius: 1rem; padding: 1rem; }
+        .m-val { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; color: var(--success); }
+
+        .chargers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 1.5rem; }
+        .c-card { background: var(--card); border: 1px solid var(--border); border-radius: 1rem; padding: 1.5rem; }
+        .c-head { display: flex; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+
+        .btn { padding: 0.75rem; border: none; border-radius: 0.75rem; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.7rem; transition: 0.2s; width: 100%; }
+        .btn-start { background: var(--success); color: #064e3b; }
+        .btn-stop { background: var(--danger); color: #450a0a; }
+        .btn-dim { background: #1e293b; color: var(--text-dim); }
+        .btn-restart { background: #475569; color: white; margin-top: 10px; }
+        .btn:hover { filter: brightness(1.2); }
+
+        .tag { font-size: 0.6rem; padding: 3px 8px; border-radius: 4px; font-weight: 800; text-transform: uppercase; border: 1px solid transparent; }
+        .tag-on { background: rgba(16,185,129,0.1); color: var(--success); border-color: rgba(16,185,129,0.2); }
+        .tag-off { background: rgba(255,255,255,0.05); color: var(--text-dim); }
+        .progress { background: #1e293b; height: 6px; border-radius: 3px; margin: 10px 0; overflow: hidden; }
+        .p-bar { background: var(--accent); height: 100%; transition: 0.5s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MINHNT CHARGER <span style="opacity:0.4">SYSTEM MONITOR</span></h1>
+            <button class="btn btn-restart" style="width:auto; padding:8px 20px;" onclick="if(confirm('Restart System Service?')) cmd(0,'restart_service')">FORCE RESTART SERVICE</button>
+        </header>
+
+        <div class="sys-info">
+            <div class="sys-card"><div class="sys-label">Modbus (USB0)</div><div class="sys-val" id="mb-st">Starting...</div></div>
+            <div class="sys-card"><div class="sys-label">DLT645 (USB1)</div><div class="sys-val" id="dlt-st">Starting...</div></div>
+            <div class="sys-card"><div class="sys-label">DLT Packets</div><div class="sys-val" id="dlt-pk">0</div></div>
+            <div class="sys-card"><div class="sys-label">Last RX (DLT)</div><div class="sys-val" id="dlt-rx">-</div></div>
+        </div>
+
+        <div class="meter-grid">
+            <div class="m-card">V: <div class="m-val" id="mv">0</div></div>
+            <div class="m-card">A: <div class="m-val" id="ma">0</div></div>
+            <div class="m-card">W: <div class="m-val" id="mp">0</div></div>
+            <div class="m-card">E: <div class="m-val" id="me">0</div></div>
+        </div>
+        <div style="display:flex;gap:1rem;margin-bottom:2rem;">
+            <button class="btn btn-start" onclick="cmd(0,'start_charge')">Start 30m Profile (Meter)</button>
+            <button class="btn btn-stop" onclick="cmd(0,'stop_charge')">Stop Meter</button>
+        </div>
+
+        <div class="chargers-grid" id="chargers-grid"></div>
+    </div>
+
+    <script>
+        const socket = io();
+        const states = ["INIT", "IDLE", "STANDBY", "CHARGING", "FINISH", "ERROR"];
+        socket.on('update', (data) => {
+            document.getElementById('mb-st').textContent = data.sys.modbus_status;
+            document.getElementById('dlt-st').textContent = data.sys.dlt645_status;
+            document.getElementById('dlt-pk').textContent = data.sys.dlt645_packets;
+            document.getElementById('dlt-rx').textContent = data.sys.last_modbus_tick > 0 ? (new Date(data.sys.last_dlt645_tick*1000).toLocaleTimeString()) : '-';
+            
+            document.getElementById('mv').textContent = data.meter.v; document.getElementById('ma').textContent = data.meter.a;
+            document.getElementById('mp').textContent = data.meter.p; document.getElementById('me').textContent = data.meter.e;
+
+            for (const [id, s] of Object.entries(data.slaves)) {
+                let el = document.getElementById(`c-${id}`);
+                if (!el) { el = document.createElement('div'); el.id = `c-${id}`; el.className = 'c-card'; document.getElementById('chargers-grid').appendChild(el); }
+                const prog = Math.min(100, (s.sd / 1800) * 100);
+                el.innerHTML = `
+                    <div class="c-head"><b>SLAVE ${id}</b><span style="font-size:0.7rem;color:var(--text-dim)">${states[s.state]}</span></div>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px;">
+                        <div style="text-align:center">V<br><b>${s.v}</b></div><div style="text-align:center">A<br><b>${s.a}</b></div>
+                        <div style="text-align:center">W<br><b>${s.p}</b></div><div style="text-align:center">°C<br><b>${s.t}</b></div>
+                    </div>
+                    <div class="progress"><div class="p-bar" style="width:${s.state===3?prog:0}%"></div></div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px;">
+                        <button class="btn btn-start" onclick="cmd(${id},'start')">START 30M</button>
+                        <button class="btn btn-stop" onclick="cmd(${id},'stop')">STOP</button>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;">
+                        <div class="tag ${s.plug?'tag-on':'tag-off'}">PLUG</div><div class="tag ${s.door?'tag-on':'tag-off'}">DOOR</div>
+                        <div class="tag ${s.tamper?'tag-on':'tag-off'}">TAMPER</div><div class="tag ${s.fan?'tag-on':'tag-off'}">FAN</div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;">
+                        <button class="btn btn-dim" onclick="cmd(${id},'toggle_plug')">Plug</button><button class="btn btn-dim" onclick="cmd(${id},'toggle_door')">Door</button>
+                        <button class="btn btn-dim" onclick="cmd(${id},'toggle_tamper')">Tamp</button><button class="btn btn-dim" onclick="cmd(${id},'reset')">Rst</button>
+                    </div>
+                    <div style="font-size:0.6rem;color:var(--text-dim);margin-top:10px;text-align:right">HB: ${s.hb} | UP: ${s.upt}s | RB: ${s.rb}</div>
+                `;
+            }
+        });
+        function cmd(id, action) { socket.emit('ui_command', { id: id, action: action }); }
+    </script>
+</body>
+</html>
