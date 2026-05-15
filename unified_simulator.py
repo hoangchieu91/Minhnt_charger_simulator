@@ -10,7 +10,7 @@ import subprocess
 from flask import Flask
 from flask_socketio import SocketIO
 
-# Pymodbus 3.x - Handling potential import changes
+# Pymodbus 3.x compatibility
 try:
     from pymodbus.datastore import ModbusSlaveContext, ModbusServerContext, ModbusSequentialDataBlock
 except ImportError:
@@ -18,6 +18,11 @@ except ImportError:
 
 from pymodbus.server import StartSerialServer
 from pymodbus.framer import FramerRTU
+
+# Enable Pymodbus Debug Logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+logging.getLogger("pymodbus").setLevel(logging.DEBUG)
+logger = logging.getLogger("Simulator")
 
 # ============================================================================
 # Config
@@ -36,10 +41,27 @@ stats = {
     "mb_rx_tick": 0, "dlt_rx_tick": 0
 }
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
-logger = logging.getLogger("Simulator")
 app = Flask(__name__, static_folder='web', static_url_path='')
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+
+# ============================================================================
+# Persistence
+# ============================================================================
+def load_state():
+    try:
+        if os.path.exists(STATE_FILE):
+            with open(STATE_FILE, 'r') as f: return json.load(f)
+    except: pass
+    return {"slaves": {}, "meter": {}}
+
+def save_state(slaves, meter):
+    state = {"slaves": {}, "meter": {}}
+    for eid, emu in slaves.items():
+        state["slaves"][str(eid)] = { "energy": emu.energy, "reboot_count": emu.reboot_count }
+    state["meter"] = {"energy": meter.energy}
+    try:
+        with open(STATE_FILE, 'w') as f: json.dump(state, f, indent=2)
+    except: pass
 
 # ============================================================================
 # Emulator Classes
@@ -81,8 +103,7 @@ class ChargerEmulator:
 
     def sync_modbus(self):
         try:
-            # FX 4: Read Input Registers
-            ir_vals = [0] * 120
+            ir_vals = [0] * 128
             ir_vals[0x00], ir_vals[0x01], ir_vals[0x02] = int(self.v*10), int(self.a*100), int(self.p)
             ir_vals[0x03], ir_vals[0x04] = (int(self.energy*100) >> 16) & 0xFFFF, int(self.energy*100) & 0xFFFF
             ir_vals[0x05], ir_vals[0x06] = int(self.t), self.state
@@ -93,10 +114,6 @@ class ChargerEmulator:
             ir_vals[0x17] = self.reboot_count
             ir_vals[0x18], ir_vals[0x19], ir_vals[0x1A] = (self.sn_bytes[0] | (self.sn_bytes[1]<<8)), (self.sn_bytes[2] | (self.sn_bytes[3]<<8)), (self.sn_bytes[4] | (self.sn_bytes[5]<<8))
             self.context.setValues(4, 0x00, ir_vals)
-            
-            # Master detection hack: if last heartbeat or some value changed, increment mb_pkts
-            # (Note: In a thread, this is approximate)
-            stats["mb_rx_tick"] = time.time()
         except: pass
 
 class MeterEmulator:
@@ -147,12 +164,11 @@ def modbus_thread():
             )
             slaves_context[i] = store
             slaves[i].context = store
-        
         context = ModbusServerContext(slaves=slaves_context, single=False)
         stats["mb_status"] = "Active"
         StartSerialServer(
             context=context, port=MODBUS_PORT, baudrate=9600, framer=FramerRTU,
-            parity='N', stopbits=1, bytesize=8, timeout=0.01
+            parity='N', stopbits=1, bytesize=8, timeout=0.001 # Aggressive timeout
         )
     except Exception as e:
         logger.error(f"Modbus Error: {e}")
