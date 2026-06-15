@@ -103,12 +103,12 @@ class ChargerEmulator:
 
     def sync_modbus(self):
         try:
-            ir_vals = [0] * 128
+            ir_vals = [0] * 300
             ir_vals[0x00], ir_vals[0x01], ir_vals[0x02] = int(self.v*10), int(self.a*100), int(self.p)
-            ir_vals[0x03], ir_vals[0x04] = (int(self.energy*100) >> 16) & 0xFFFF, int(self.energy*100) & 0xFFFF
+            ir_vals[0x03], ir_vals[0x04] = (int(self.energy*1000) >> 16) & 0xFFFF, int(self.energy*1000) & 0xFFFF
             ir_vals[0x05], ir_vals[0x06] = int(self.t), self.state
-            ir_vals[0x07] = ( (1 if self.state == STATE_CHARGING else 0) << 0 | (1 if self.fan else 0) << 2 )
-            ir_vals[0x0B], ir_vals[0x0C] = int(self.se * 100), self.sd
+            ir_vals[0x07] = ( (1 if self.state == STATE_CHARGING else 0) << 2 | (1 if self.fan else 0) << 1 )
+            ir_vals[0x0B], ir_vals[0x0C] = int(self.se * 1000), self.sd
             ir_vals[0x14] = self.hb
             ir_vals[0x15], ir_vals[0x16] = (int(time.time()-self.start_time) >> 16) & 0xFFFF, int(time.time()-self.start_time) & 0xFFFF
             ir_vals[0x17] = self.reboot_count
@@ -157,10 +157,10 @@ def modbus_thread():
         slaves_context = {}
         for i in SLAVE_IDS:
             store = ModbusSlaveContext(
-                di=ModbusSequentialDataBlock(0, [0]*128),
-                co=ModbusSequentialDataBlock(0, [False]*128),
-                hr=ModbusSequentialDataBlock(0, [0]*128),
-                ir=ModbusSequentialDataBlock(0, [0]*128)
+                di=ModbusSequentialDataBlock(0, [0]*300),
+                co=ModbusSequentialDataBlock(0, [False]*300),
+                hr=ModbusSequentialDataBlock(0, [0]*300),
+                ir=ModbusSequentialDataBlock(0, [0]*300)
             )
             slaves_context[i] = store
             slaves[i].context = store
